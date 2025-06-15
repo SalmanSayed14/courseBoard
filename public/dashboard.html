@@ -4,46 +4,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="icon" href="img/boardIcon.png" />
+  <title>Dashboard</title>
 </head>
 
 <body>
   <nav>
-    <a href="/dashboard.html">Home</a>
+    <a href="#">Home</a>
     <a href="#">Calendar</a>
-    <a href="/editProfile.html">Profile</a>
+    <a href="#">Profile</a>
     <a href="#" id="logout">Logout</a>
   </nav>
-  <div class="container">
-    <h1>Dashboard</h1>
-    <div id="staffControls" style="display: none;">
-      <h2>Create Course</h2>
-      <form id="createCourseForm">
-        <input type="text" name="courseName" placeholder="Course Name" required>
-        <button type="submit">Create Course</button>
-      </form>
+
+  <div class="sidebar">
+    <button class="toggle-sidebar">☰</button>
+    <div class="sidebar-content">
+      <button class="open-modal-btn">Create Course</button>
+
+      <div id="staffControlsModal" class="modal">
+        <div class="modal-content">
+          <span class="close-button">×</span>
+          <div id="staffControls">
+            <h2>Create Course</h2>
+            <form id="createCourseForm">
+              <input type="text" name="courseName" placeholder="Course Name" required>
+              <button type="submit">Create Course</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="studentControls">
+        <h2>Available Courses</h2>
+        <select id="courseSelect"></select>
+        <button id="enrollButton">Enroll</button>
+      </div>
+
+      <h2>Your Courses</h2>
+      <div id="courses"></div>
     </div>
-    <div id="studentControls" style="display: none;">
-      <h2>Available Courses</h2>
-      <select id="courseSelect"></select>
-      <button id="enrollButton">Enroll</button>
-    </div>
-    <h2>Your Courses</h2>
-    <div id="courses"></div>
-    <h2>Posts</h2>
-    <button id="newPostButton">+ New Post</button>
-    <form id="newPostForm">
-      <select id="postCourseSelect" name="courseId">
-        <option value="">General Post</option>
-      </select>
-      <textarea name="content" placeholder="Write a new post" required></textarea>
-      <button type="submit">Publish</button>
-    </form>
-    <div id="posts"></div>
-    <p class="error" id="error"></p>
   </div>
+
+  <h1>Dashboard</h1>
+  <div id="error"></div>
+
+  <h2>Posts</h2>
+  <button id="newPostButton">+ New Post</button>
+  <form id="newPostForm">
+    <select id="postCourseSelect">
+      <option value="">General Post</option>
+    </select>
+    <textarea name="content" placeholder="Write a post..." required></textarea>
+    <button type="submit">Publish</button>
+  </form>
+  <div id="posts"></div>
+
   <script src="js/dashboard.js"></script>
 </body>
 
