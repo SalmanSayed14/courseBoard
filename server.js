@@ -164,7 +164,6 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
       updateData.password = await bcrypt.hash(password, 10);
     }
     if (userType) {
-      // Restrict userType changes to prevent unauthorized escalation
       const currentUser = await User.findById(req.user.userId);
       if (currentUser.userType !== userType && currentUser.userType !== 'STAFF') {
         return res.status(403).json({ error: 'Only staff can change user type' });
@@ -210,6 +209,87 @@ app.post('/api/courses', authenticateToken, isStaff, async (req, res) => {
   }
 });
 
+// Update Course Name (Staff only)
+app.put('/api/courses/:courseId', authenticateToken, isStaff, async (req, res) => {
+  const { courseName } = req.body;
+  const courseId = req.params.courseId;
+
+  if (!courseName) {
+    return res.status(400).json({ error: 'Course name cannot be empty' });
+  }
+
+  try {
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'Only course creator can update course' });
+    }
+
+    course.courseName = courseName;
+    await course.save();
+    res.json({ message: 'Course updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete Course (Staff only)
+app.delete('/api/courses/:courseId', authenticateToken, isStaff, async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'Only course creator can delete course' });
+    }
+
+    await Course.deleteOne({ _id: courseId });
+    await Post.deleteMany({ courseId }); // Delete associated posts
+    res.json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Invite Student to Course (Staff only)
+app.post('/api/courses/:courseId/invite', authenticateToken, isStaff, async (req, res) => {
+  const { email } = req.body;
+  const courseId = req.params.courseId;
+
+  try {
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'Only course creator can invite students' });
+    }
+
+    const student = await User.findOne({ email, userType: 'STUDENT' });
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    if (course.enrolledUsers.includes(student._id)) {
+      return res.status(400).json({ error: 'Student already enrolled' });
+    }
+
+    course.enrolledUsers.push(student._id);
+    await course.save();
+    res.json({ message: 'Student invited successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Enroll in Course (Students only)
 app.post('/api/courses/:courseId/enroll', authenticateToken, async (req, res) => {
   try {
@@ -245,6 +325,20 @@ app.get('/api/courses', authenticateToken, async (req, res) => {
     } else {
       courses = await Course.find({ enrolledUsers: req.user.userId });
     }
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get All Courses (for students to see available courses)
+app.get('/api/courses/all', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (user.userType !== 'STUDENT') {
+      return res.status(403).json({ error: 'Only students can view all courses' });
+    }
+    const courses = await Course.find();
     res.json(courses);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -295,14 +389,12 @@ app.get('/api/posts', authenticateToken, async (req, res) => {
     const user = await User.findById(req.user.userId);
     let posts;
     if (user.userType === 'STAFF') {
-      // Staff see posts in their courses
       const courses = await Course.find({ createdBy: req.user.userId });
       const courseIds = courses.map(c => c._id);
       posts = await Post.find({
         $or: [{ userId: req.user.userId }, { courseId: { $in: courseIds } }],
       }).sort({ createdAt: -1 });
     } else {
-      // Students see posts in their enrolled courses or their own posts
       const courses = await Course.find({ enrolledUsers: req.user.userId });
       const courseIds = courses.map(c => c._id);
       posts = await Post.find({

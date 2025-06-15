@@ -11,55 +11,60 @@
 
 <body>
   <nav>
-    <a href="#">Home</a>
+    <a href="/dashboard.html">Home</a>
     <a href="#">Calendar</a>
-    <a href="#">Profile</a>
-    <a href="#" id="logout">Logout</a>
+    <a href="/editProfile.html">Profile</a>
+    <button id="logout">Logout</button>
   </nav>
-
   <div class="sidebar">
-    <button class="toggle-sidebar">☰</button>
-    <div class="sidebar-content">
-      <button class="open-modal-btn">Create Course</button>
-
-      <div id="staffControlsModal" class="modal">
-        <div class="modal-content">
-          <span class="close-button">×</span>
-          <div id="staffControls">
-            <h2>Create Course</h2>
-            <form id="createCourseForm">
-              <input type="text" name="courseName" placeholder="Course Name" required>
-              <button type="submit">Create Course</button>
-            </form>
+    <button class="open-modal-btn" style="display: none;">+</button>
+    <div id="error"></div>
+    <div class="modal" id="staffControlsModal">
+      <div class="modal-content">
+        <span class="close-button">×</span>
+        <h2>Create Course</h2>
+        <form id="createCourseForm">
+          <div class="form-group">
+            <label for="courseName">Course Name</label>
+            <input type="text" id="courseName" name="courseName" required>
           </div>
-        </div>
+          <button type="submit">Create Course</button>
+        </form>
+        <h2>Invite Student</h2>
+        <form id="inviteStudentForm">
+          <div class="form-group">
+            <label for="courseSelectInvite">Course</label>
+            <select id="courseSelectInvite" name="courseId" required></select>
+          </div>
+          <div class="form-group">
+            <label for="studentEmail">Student Email</label>
+            <input type="email" id="studentEmail" name="email" required>
+          </div>
+          <button type="submit">Invite Student</button>
+        </form>
       </div>
-
-      <div id="studentControls">
-        <h2>Available Courses</h2>
-        <select id="courseSelect"></select>
-        <button id="enrollButton">Enroll</button>
-      </div>
-
-      <h2>Your Courses</h2>
-      <div id="courses"></div>
     </div>
+    <div id="studentControls">
+      <h2>Available Courses</h2>
+      <select id="courseSelect"></select>
+      <button id="enrollButton">Enroll</button>
+    </div>
+    <h2>Your Courses</h2>
+    <div id="courses"></div>
   </div>
-
-  <h1>Dashboard</h1>
-  <div id="error"></div>
-
-  <h2>Posts</h2>
-  <button id="newPostButton">+ New Post</button>
-  <form id="newPostForm">
-    <select id="postCourseSelect">
-      <option value="">General Post</option>
-    </select>
-    <textarea name="content" placeholder="Write a post..." required></textarea>
-    <button type="submit">Publish</button>
-  </form>
-  <div id="posts"></div>
-
+  <div class="toggle-sidebar">☰</div>
+  <div class="content">
+    <h2>Posts</h2>
+    <button id="newPostButton">+ New Post</button>
+    <form id="newPostForm">
+      <select id="postCourseSelect" name="courseId">
+        <option value="">General Post</option>
+      </select>
+      <textarea name="content" placeholder="Write your post..." required></textarea>
+      <button type="submit">Publish</button>
+    </form>
+    <div id="posts"></div>
+  </div>
   <script src="js/dashboard.js"></script>
 </body>
 

@@ -1,173 +1,200 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  display: flex;
+}
+
+.sidebar {
+  width: 60px;
+  background: linear-gradient(180deg, #2c2c2c, #1a1a1a);
+  color: white;
+  height: 100vh;
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding-top: 150px;
+}
+
+.sidebar > * {
+  display: none; /* Hide all direct children when sidebar is collapsed */
+}
+
+.sidebar.expanded {
+  width: 200px;
+}
+
+.sidebar.expanded > * {
+  display: flex; /* Show all direct children when sidebar is expanded */
+}
+
+.sidebar a, .sidebar button {
+  align-items: center;
+  color: #e0e0e0;
+  padding: 12px 15px;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar a:hover, .sidebar button:hover {
+  background: #4a4a4a;
+  color: #ffffff;
+}
+
+.sidebar a::before, .sidebar button::before {
+  content: ''; /* Remove bullet icon */
+  margin-right: 10px;
+  font-size: 12px;
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+}
+.open-modal-btn {
+  height: 50px;
+  width: 50;
+}
+.toggle-sidebar {
+  position: fixed;
+  padding-top: 80px;
+  left: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+
+.content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 60px;
+  transition: margin-left 0.3s;
+}
+
+.sidebar-expanded .content {
+  margin-left: 200px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+}
+
+.close-button {
+  float: right;
+  cursor: pointer;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button, .course-button {
+  padding: 10px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+  display: inline-block;
+  margin: 5px 0;
+  transition: background 0.2s;
+}
+
+button:hover, .course-button:hover {
+  background: #555;
+}
+
+#error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between course button and edit button */
+  margin-bottom: 10px;
+}
+
+#newPostForm {
+  display: none;
+  margin-top: 20px;
+}
+
+#newPostForm.active {
+  display: block;
+}
+
+#newPostForm textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+#studentControls {
+  display: none;
+  margin-bottom: 20px;
+}
+
 nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            z-index: 1001;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 98%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  z-index: 1001;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-right: 20px;
-            font-size: 16px;
-        }
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-right: 20px;
+  font-size: 16px;
+}
 
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        /* Sidebar styles */
-        .sidebar {
-            position: fixed;
-            top: 60px; /* Below the nav bar */
-            left: 0;
-            height: calc(100vh - 60px); /* Full height minus nav */
-            width: 50px; /* Collapsed width */
-            background-color: #f8f8f8;
-            transition: width 0.3s ease;
-            z-index: 1000;
-            overflow-x: hidden; /* Prevent horizontal scroll in collapsed state */
-        }
-
-        .sidebar.expanded {
-            width: 300px; /* Expanded width */
-        }
-
-        .sidebar-content {
-            padding: 20px;
-            opacity: 0; /* Hidden when collapsed */
-            transition: opacity 0.3s ease;
-            display: none; /* Ensure content is hidden when collapsed */
-        }
-
-        .sidebar.expanded .sidebar-content {
-            opacity: 1;
-            display: block;
-        }
-
-        .toggle-sidebar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #008CBA;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 4px;
-        }
-
-        .toggle-sidebar:hover {
-            background-color: #006d93;
-        }
-
-        /* Main content adjustment */
-        body {
-            margin: 0;
-            padding-top: 60px; /* Space for fixed nav */
-            padding-left: 70px; /* Space for collapsed sidebar */
-            font-family: Arial, sans-serif;
-            transition: padding-left 0.3s ease;
-        }
-
-        body.sidebar-expanded {
-            padding-left: 320px; /* Space for expanded sidebar */
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1002; /* Above nav and sidebar */
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            width: 300px;
-            max-width: 90%;
-            position: relative;
-        }
-
-        .close-button {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        /* Form styles */
-        #createCourseForm {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        #createCourseForm input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        #createCourseForm button {
-            padding: 8px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #createCourseForm button:hover {
-            background-color: #45a049;
-        }
-
-        /* Open button style */
-        .open-modal-btn {
-            padding: 10px 20px;
-            background-color: #008CBA;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%; /* Full width in sidebar */
-        }
-
-        .open-modal-btn:hover {
-            background-color: #006d93;
-        }
-
-        /* Hide student controls by default */
-        #studentControls {
-            display: none;
-        }
-
-        /* Basic layout for other elements */
-        .course-item, .post-item {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #newPostForm {
-            display: none;
-        }
-
-        #newPostForm.active {
-            display: block;
-        }
+nav a:hover {
+  text-decoration: underline;
+}

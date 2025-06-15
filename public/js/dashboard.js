@@ -10,12 +10,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modal = document.getElementById('staffControlsModal');
   const openBtn = document.querySelector('.open-modal-btn');
   const closeBtn = document.querySelector('.close-button');
-  const form = document.getElementById('createCourseForm');
+  const createCourseForm = document.getElementById('createCourseForm');
+  const inviteStudentForm = document.getElementById('inviteStudentForm');
+  const courseSelectInvite = document.getElementById('courseSelectInvite');
   const studentControls = document.getElementById('studentControls');
   const courseSelect = document.getElementById('courseSelect');
   const enrollButton = document.getElementById('enrollButton');
   const sidebar = document.querySelector('.sidebar');
   const toggleSidebarBtn = document.querySelector('.toggle-sidebar');
+
+  // Ensure sidebar is collapsed on load
+  if (sidebar) {
+    sidebar.classList.remove('expanded');
+    document.body.classList.remove('sidebar-expanded');
+    if (toggleSidebarBtn) toggleSidebarBtn.textContent = '☰';
+  }
 
   if (!token) {
     window.location.href = '/index.html';
@@ -28,13 +37,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     studentControls.style.display = 'block';
     modal.style.display = 'none';
-    openBtn.style.display = 'none'; // Hide Create Course button for non-staff
+    openBtn.style.display = 'none';
   }
 
   // Toggle sidebar
   if (toggleSidebarBtn) {
     toggleSidebarBtn.addEventListener('click', () => {
       sidebar.classList.toggle('expanded');
+      console.log('Sidebar expanded:', sidebar.classList.contains('expanded')); // Debug log
       document.body.classList.toggle('sidebar-expanded');
       toggleSidebarBtn.textContent = sidebar.classList.contains('expanded') ? '←' : '☰';
     });
@@ -84,14 +94,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const courses = await response.json();
       console.log('Courses fetched:', courses);
       coursesEl.innerHTML = courses.length
-        ? courses.map(c => `<div class="course-item">${c.courseName}</div>`).join('')
+        ? courses.map(c => `
+            <div class="course-item">
+              <button class="course-button">${c.courseName}</button>
+              ${user.userType === 'STAFF' ? `<a href="/editCourse.html?courseId=${c._id}"><button>Edit</button></a>` : ''}
+            </div>
+          `).join('')
         : 'No courses available';
       // Populate post course select
       postCourseSelect.innerHTML = '<option value="">General Post</option>' +
         courses.map(c => `<option value="${c._id}">${c.courseName}</option>`).join('');
+      // Populate invite course select (staff only)
+      if (user.userType === 'STAFF') {
+        courseSelectInvite.innerHTML = courses.map(c => `<option value="${c._id}">${c.courseName}</option>`).join('');
+      }
       // Populate enroll course select (students only)
       if (user.userType !== 'STAFF') {
-        const allCoursesResponse = await fetch('http://localhost:3000/api/courses', {
+        const allCoursesResponse = await fetch('http://localhost:3000/api/courses/all', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (!allCoursesResponse.ok) {
@@ -131,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Create course (staff only)
   if (user.userType === 'STAFF') {
-    form.addEventListener('submit', async (e) => {
+    createCourseForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const courseName = formData.get('courseName').trim();
@@ -156,13 +175,46 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert('Course created!');
           e.target.reset();
           modal.style.display = 'none';
-          await loadCourses(); // Ensure courses are reloaded
+          await loadCourses();
         } else {
           errorEl.textContent = result.error || 'Failed to create course';
         }
       } catch (error) {
         console.error('Error creating course:', error);
         errorEl.textContent = 'Error creating course';
+      }
+    });
+
+    // Invite student (staff only)
+    inviteStudentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        email: formData.get('email'),
+      };
+      const courseId = formData.get('courseId');
+      try {
+        console.log('Inviting student:', data, 'to course:', courseId);
+        const response = await fetch(`http://localhost:3000/api/courses/${courseId}/invite`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        console.log('Invite student response:', result);
+        if (response.ok) {
+          alert('Student invited successfully!');
+          e.target.reset();
+          await loadCourses();
+        } else {
+          errorEl.textContent = result.error || 'Failed to invite student';
+        }
+      } catch (error) {
+        console.error('Error inviting student:', error);
+        errorEl.textContent = 'Error inviting student';
       }
     });
   }
